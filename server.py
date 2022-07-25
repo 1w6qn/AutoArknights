@@ -13,6 +13,8 @@ class AuthServer:
         self.device_id=utils.get_random_device_id()
         self.device_id2=utils.get_random_device_id2()
         self.device_id3=utils.get_random_device_id3()
+        if access_token:self.auth_login()
+        else:self.user_login()
     def post(self,cgi,data):
         sign_str=''
         for i in data:
@@ -42,6 +44,7 @@ class GameServer:
         self.token=token
         self.seqnum=0
         self.secret=''
+        self.game_login()
     def post(self,cgi,data):
         header={"uid":self.uid,"secret":self.secret,"seqnum":str(self.seqnum)}
         header.update(config.COMMON_HEADER)

@@ -1,15 +1,11 @@
 import server,player,utils,json
-utils.update_config()
-#aus= server.AuthServer('18005767005','zhu159637','xPwp3VUKP0nOK+foeGDhx6wp')
-aus= server.AuthServer('13105612936','zhu159637','Jvk9w1N8ls8d0McB5gTt2Jcj')
-aus.auth_login()
-uid,token=aus.get_token()
-gs=server.GameServer(uid,token)
-gs.game_login(aus)
-p=player.Player(gs)
-p.sync_data()
-p.sync_status()
-p.receive_social_point()
-p.auto_get_social_good()
-p.auto_recruit()
-#p.normal_gacha()
+def load_from_json(filename):
+    j=utils.load_json(filename)[0]
+    aus=server.AuthServer(j['account'],j['password'],j['access_token'])
+    uid,token=aus.get_token()
+    gs=server.GameServer(uid,token)
+    return player.Player(gs)
+def play(player):
+    p.sync_data()
+p=load_from_json('default.json')
+play(p)

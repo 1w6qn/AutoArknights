@@ -1,10 +1,8 @@
-import json,utils
-with open('/root/AutoArknights/zh_CN/gamedata/excel/item_table.json','r') as f:
-    item_info=json.loads(f.read())
-with open('/root/AutoArknights/zh_CN/gamedata/excel/character_table.json','r') as f:
-    char_info=json.loads(f.read())
-with open('/root/AutoArknights/zh_CN/gamedata/excel/gamedata_const.json','r') as f:
-    game_const=json.loads(f.read())
+import json
+from utils import *
+item_table=load_json('zh_CN/gamedata/excel/item_table.json')
+char_table=load_json('zh_CN/gamedata/excel/character_table.json')
+game_const=load_json('zh_CN/gamedata/excel/gamedata_const.json')
 class Char:
     def update(self,new):
         print(f"{self.name} 精{self.get_evolve_phase()} {self.get_level()}/{self.get_max_level()}级 {self.get_exp()}/{self.get_max_exp()} -> 精{self.get_evolve_phase()} {self.get_level()}/{self.get_max_level()}级 {self.get_exp()}/{self.get_max_exp()}")

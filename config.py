@@ -1,3 +1,4 @@
+import requests,json
 PLATFORM_ID='Android'
 SERVER="CN"
 PLATFORM=1
@@ -37,3 +38,13 @@ else:
     HOST["GAME"]= 'https://ak-gs-gf.hypergryph.com'
     HOST["CONFIG"]= 'https://ak-conf.hypergryph.com'
     HOST["VERSION"]= "https://ak-conf.hypergryph.com/config/prod/official/{}/version".format(PLATFORM_ID)
+def get_from_conf(url):
+    return requests.get(url,headers=COMMON_HEADER).json()
+def update_config():
+    global NETWORK_VERSION,RES_VERSION,CLIENT_VERSION
+    res=get_from_conf(HOST['CONFIG']+"/config/prod/official/network_config")
+    NETWORK_VERSION=json.loads(res["content"])["configVer"]
+    v=get_from_conf(HOST['VERSION'])
+    RES_VERSION,CLIENT_VERSION=v['resVersion'],v['clientVersion']
+    report(f"资源更新成功 ResVersion:{RES_VERSION} ClientVersion:{CLIENT_VERSION}")
+update_config()

@@ -1,6 +1,6 @@
-import config,utils,json,objects,random,time
-with open('/root/servers/qqbot/ak/data/zh_CN/gamedata/excel/gacha_table.json','r') as f:
-    gacha_info=json.loads(f.read())
+import config,json,objects,random,time,server
+from utils import *
+gacha_table=load_json('zh_CN/gamedata/excel/gacha_table.json')
 class Player:
     chars=[]
     def update_attr(self,new,print=True):
@@ -28,42 +28,43 @@ class Player:
         self.uid=gs.uid
         if attr:self.attr=attr
         else:self.sync_data()
-    def sync_data(self):
-        data='{{"platform":{}}}'.format(config.PLATFORM)
-        j=self.gs.post("/account/syncData",data)
-        self.time_diff=j['ts']
-        self.update_attr(j['user'],print=False)
-        utils.report("数据同步成功 uid:{}".format(self.uid))
-    def sync_status(self):
-        data = '{{"modules":{},"params":{{"16":{{"goodIdMap":{{"LS":[],"HS":[],"ES":[],"CASH":[],"GP":["GP_Once_1"],"SOCIAL":[]}}}}}}}}'.format(config.MODULES)
-        res = self.gs.post('/account/syncStatus', data)
-        self.update_attr(res['playerDataDelta']['modified'],print=False)
-        utils.report("数据同步成功 uid:{} 同步时间:{}".format(self.uid,res['ts']))
-    def sync_building(self):
-        res=self.gs.post('/building/sync','{}')
-        self.update_attr(res['playerDataDelta']['modified'],print=False)
-        utils.report("基建同步成功 同步时间:{}, uid:{}".format(res['ts'],self.uid))
-    def sync_normal_gacha(self):
-        res=self.gs.post('/gacha/syncNormalGacha','{}')
-        self.update_attr(res['playerDataDelta']['modified'])
-        utils.report("公招同步成功")
-    def normal_gacha(self,slot_id,tag_list,special_tag_id,duration):
-        data='{{"slotId":{},"tagList":{},"specialTagId":{},"duration":{}}}'.format(slot_id,tag_list,special_tag_id,duration)
-        res=self.gs.post('/gacha/normalGacha',data)
-        self.update_attr(res['playerDataDelta']['modified'])
-        utils.report("公招成功, uid:{}".format(self.uid))
-    def finish_normal_gacha(self,slot_id):
+        self.init_chars()
+    def post(self,cgi,data):
+        res=self.gs.post(cgi,data)
+        if res.get("user"):self.update_attr(res["user"])
+        else:self.update_attr(res["playerDataDelta"]["modified"])
+        return res
+    def api_sync_data(self):
+        data=f'{{"platform":{config.PLATFORM}}}'
+        res=self.gs.post("/account/syncData",data)
+        return res
+    def api_sync_status(self):
+        data =f'{{"modules":{config.MODULES},"params":{{"16":{{"goodIdMap":{{"LS":[],"HS":[],"ES":[],"CASH":[],"GP":["GP_Once_1"],"SOCIAL":[]}}}}}}}}'
+        res=self.post('/account/syncStatus', data)
+        return res
+    def api_sync_building(self):
+        res=self.post('/building/sync','{}')
+        return res
+    def api_sync_normal_gacha(self):
+        res=self.post('/gacha/syncNormalGacha','{}')
+        return res
+    def api_normal_gacha(self,slot_id,tag_list,special_tag_id,duration):
+        data=f'{{"slotId":{slot_id},"tagList":{tag_list},"specialTagId":{special_tag_id},"duration":{duration}}}'
+        res=self.post('/gacha/normalGacha',data)
+        return res
+    def api_finish_normal_gacha(self,slot_id):
         data='{{"slotId":{}}}'.format(slot_id)
         res=self.gs.post('/gacha/finishNormalGacha',data)
-        if not res['result']:
-            self.update_attr(res['playerDataDelta']['modified'])
-            utils.report(f"公招完成, uid:{self.uid}, 获得:{res['charGet']['charId']}")
+        return res
     def auto_recruit(self):
         for i in range(0,4):
             slot=self.attr['recruit']['normal']['slots'][str(i)]
             if not slot['state']:continue
             if slot['state']==2 and slot['maxFinishTs']<=time.time():
-                self.finish_normal_gacha(i)
+                res=self.api_finish_normal_gacha(i)
+                if not res['result']:
+                    char_get=objects.char(res["charGet"]["charId"],"0")
+                    utils.report(f"公招完成 slotId:{i} {res['charGet']['isNew']}获得{char_get.name}")
             tag_list,special_tag_id,duration=self.select_tag(slot['tags'])
             self.normal_gacha(i,tag_list,special_tag_id,duration)
     def auto_select_tag(self,tag_list):#WIP
@@ -187,12 +188,12 @@ class Player:
         res = self.gs.post('/user/useItem', data)
         self.update_attr(res['playerDataDelta']['modified'])
         utils.report('道具使用成功: uid:{}, 道具id:{}, 道具剩余数量:{}'.format(self.uid, item_id, self.attr['consumable'][item_id][inst_id]['count']))
-    def upgrade_char(char_inst_id,exp_mats):
+    def upgrade_char(self,char_inst_id,exp_mats):
         data='{{"charInstId":{},"expMats":{}}}'.format(inst_id, json.dumps(exp_mats))
         res = self.gs.post('/charBuild/upgradeChar',data)
         self.update_attr(res['playerDataDelta']['modified'])
         utils.report(f'干员升级成功: uid:{self.uid}')
-    def evolve_char(char_inst_id):
+    def evolve_char(self,char_inst_id):
         data='{{"charInstId":{}}}'.format(inst_id)
         res = self.gs.post('/charBuild/evolveChar',data)
         self.update_attr(res['playerDataDelta']['modified'])
