@@ -3,6 +3,7 @@ from utils import *
 gacha_table=load_json('./zh_CN/gamedata/excel/gacha_table.json')
 class Player:
     chars=[]
+    items={}
     attr={}
     def update_attr(self,new,print=True):
         merge_dict(self.attr,new)
@@ -13,13 +14,14 @@ class Player:
         with open('player.txt','w') as f:
             f.write(json.dumps(self.attr))
     def init_inventory(self):
-        for i in self.attr['inventory']:
-            self.items.append(objects.Item(i,self.attr['inventory'][i]))
+        for k,v in self.attr['inventory'].items():
+            v.update({"itemId":k})
+            self.items.update({k:objects.Item(v)})
     def get_inventory(self):
         return self.items
     def init_chars(self):
-        for i in self.attr['troop']['chars']:
-            self.chars.append(objects.Char(self.attr['troop']['chars'][i]['charId'],i))
+        for k,v in self.attr['troop']['chars'].items():
+            self.chars[int(k)-1]=objects.Char(v)
     def get_chars(self):
         return self.chars
     def __str__(self):
@@ -32,7 +34,6 @@ class Player:
         self.init_chars()
     def post(self,cgi,data):
         res=self.gs.post(cgi,data)
-        print(res.keys())
         if res.get("user"):self.update_attr(res["user"])
         else:self.update_attr(res["playerDataDelta"]["modified"])
         return res

@@ -4,6 +4,7 @@ item_table=load_json('./zh_CN/gamedata/excel/item_table.json')
 char_table=load_json('./zh_CN/gamedata/excel/character_table.json')
 game_const=load_json('./zh_CN/gamedata/excel/gamedata_const.json')
 class Char:
+    attr={}
     def update(self,new):
         print(f"{self.name} 精{self.get_evolve_phase()} {self.get_level()}/{self.get_max_level()}级 {self.get_exp()}/{self.get_max_exp()} -> 精{self.get_evolve_phase()} {self.get_level()}/{self.get_max_level()}级 {self.get_exp()}/{self.get_max_exp()}")
         self.attr.update(new)
@@ -23,14 +24,17 @@ class Char:
         return self.attr["evolvePhase"]
     def get_inst_id(self):
         return self.attr["instId"]
-    def __init__(self,id,data):
-        self.attr=char_table[id]
-        self.id=id
+    def __init__(self,data):
         self.attr.update(data)
+        self.id=self.attr["charId"]
+        self.attr.update(char_table[id])
         self.name=self.attr["name"]
 class Item:
-    def __init__(self,id,count):
-        self.attr=item_table['items'][id]
-        self.count=count
+    attr={}
+    def __init__(self,data):
+        self.attr.update(data)
+        self.id=self.attr['itemId']
+        self.attr.update(item_table['items'][self.id])
+        self.count=self.attr['count']
     def __str__(self):
         return "{}{}{}:{}".format(utils.rcolor[self.attr['rarity']],self.attr["name"],utils.color.RESET,self.count)

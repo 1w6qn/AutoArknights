@@ -56,6 +56,5 @@ class GameServer:
     def game_login(self,aus):
         data='''{{"networkVersion":"{}","uid":"{}","token":"{}","assetsVersion":"{}","clientVersion":"{}","platform":{},"deviceId":"{}","deviceId2":"{}","deviceId3":"{}"}}'''.format(config.NETWORK_VERSION, self.uid, self.token, config.RES_VERSION, config.CLIENT_VERSION, config.PLATFORM, aus.device_id,aus.device_id2, aus.device_id3)
         j=self.post("/account/login",data)
-        print(j)
         self.secret=j["secret"]
         utils.report("游戏登录成功 uid:{} secret:{}".format(self.uid,self.secret))
