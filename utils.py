@@ -1,6 +1,6 @@
 import hmac,hashlib,json,random,string
-import time
-import config
+import time,requests
+from config import *
 class color:
     RED="\033[31m"
     WHITE="\033[37m"
@@ -35,7 +35,7 @@ def get_random_device_id2():
 def get_random_device_id3():
     return GetMd5(''.join(random.choices(string.ascii_letters + string.digits, k = 12)))
 def u8_sign(data):
-    sign = hmac.new(config.HMAC_KEY.encode(), data.encode(), hashlib.sha1)
+    sign = hmac.new(HMAC_KEY.encode(), data.encode(), hashlib.sha1)
     return sign.hexdigest()
 def report(data):
     msg=time.strftime("[%H:%M:%S]", time.localtime())+" "+data
@@ -43,3 +43,13 @@ def report(data):
 def load_json(filename):
     with open(filename,'r') as f:
         return json.loads(f.read())
+def get_from_conf(url):
+    return requests.get(url,headers=COMMON_HEADER).json()
+def update_config():
+    global NETWORK_VERSION,RES_VERSION,CLIENT_VERSION
+    res=get_from_conf(HOST['CONFIG']+"/config/prod/official/network_config")
+    NETWORK_VERSION=json.loads(res["content"])["configVer"]
+    v=get_from_conf(HOST['VERSION'])
+    RES_VERSION,CLIENT_VERSION=v['resVersion'],v['clientVersion']
+    report(f"资源更新成功 ResVersion:{RES_VERSION} ClientVersion:{CLIENT_VERSION}")
+update_config()
