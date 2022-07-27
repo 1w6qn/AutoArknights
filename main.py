@@ -1,6 +1,6 @@
 import server,player,utils,json
 def load_from_json(filename):
-    j=utils.load_json(filename)[1]
+    j=utils.load_json(filename)[0]
     return login(j['account'],j['password'],j['access_token'])
 def login(account,password,access_token):
     aus=server.AuthServer(account,password,access_token)

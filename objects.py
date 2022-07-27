@@ -33,8 +33,15 @@ class Item:
     attr={}
     def __init__(self,data):
         self.attr.update(data)
-        self.id=self.attr['itemId']
+        self.id=self.attr['id']
         self.attr.update(item_table['items'][self.id])
+        self.name=self.attr['name']
         self.count=self.attr['count']
     def __str__(self):
         return "{}{}{}:{}".format(utils.rcolor[self.attr['rarity']],self.attr["name"],utils.color.RESET,self.count)
+class Mission:
+    attr={}
+    def __init__(self,data):
+        self.attr.update(data)
+        self.id=self.attr['id']
+        self.attr.update(mission_table['missions'][self.id])
