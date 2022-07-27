@@ -27,7 +27,7 @@ class Char:
     def __init__(self,data):
         self.attr.update(data)
         self.id=self.attr["charId"]
-        self.attr.update(char_table[id])
+        self.attr.update(char_table[self.id])
         self.name=self.attr["name"]
 class Item:
     attr={}
