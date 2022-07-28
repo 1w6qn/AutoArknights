@@ -54,7 +54,7 @@ class Player:
             item=objects.Item(i)
             s+=f" {item.name} {item.count}"
         report(f"签到成功 {s}")
-    def auto_get_social_good(self):
+    def auto_buy_social_good(self):
         good_list=self.api_get_social_good_list()
         a=0
         buy_list=[]
@@ -75,7 +75,7 @@ class Player:
             print(s)
         for i in buy_list:
             self.api_buy_social_good(good_list[i]['goodId'])
-        report('获取信用商品成功: uid:{}'.format(self.uid))
+        report('获取信用商品成功')
     def get_unavail_social_good_list(self):
         unavail_list=[]
         for i in self.attr['shop']['SOCIAL']['info']:
