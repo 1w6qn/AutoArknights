@@ -21,7 +21,7 @@ class Player:
                 print(res)
                 if not res['result']:
                     char_get=objects.Char(res["charGet"])
-                    report(f"公招完成 slotId:{i} {res['isNew']}获得{char_get.name} 获得{char_get.attr['itemGet']}")
+                    report(f"公招完成 slotId:{i} {char_get.attr['isNew']}获得{char_get.name} 获得{char_get.attr['itemGet']}")
             tag_list,special_tag_id,duration=self.select_tag(slot['tags'])
             self.api_normal_gacha(i,tag_list,special_tag_id,duration)
             report(f"公招成功 slotId:{i} tagList:{tag_list} duration:{duration}")
@@ -84,6 +84,18 @@ class Player:
     def auto_confirm_missions(self):
         d=self.api_auto_confirm_missions("DAILY")
         w=self.api_auto_confirm_missions("WEEKLY")
+    def auto_receive_mail(self):
+        mail_list=self.api_get_meta_info_list()['result']
+        norm,sys=[],[]
+        for i in mail_list:
+            if i['state'] or (not i['hasItem']):continue
+            if i['type']:sys.append(i['mailId'])
+            else:norm.append(i['mailId'])
+        if not(norm and sys):
+            r=self.api_receive_all_mail(norm,sys)
+            report("邮件物品收取成功")
+            self.print_items(r['items'])
+        else:report("无可收取邮件")
     def update_attr(self,new):
         if new.get("mission"):
             self.update_mission(new['mission'])
@@ -94,7 +106,7 @@ class Player:
                 self.chars[int(i)-1].update(chars[i])
         with open('player.txt','w') as f:
             f.write(json.dumps(self.attr))
-    def update_mission(new):
+    def update_mission(self,new):
         s=""
         for type,missions in new.items():
             if type=="DAILY":s+="日常任务更新"
@@ -106,6 +118,12 @@ class Player:
                 s+=f"\n{mission.attr['description']} {progress['value']}/{progress['target']}"
                 if progress['value']==progress['target']:
                     s+='( 已完成 )'
+    def print_items(self,items):
+        s=""
+        for i in items:
+            item=objects.Item(i)
+            s+=f"{item.name}*{item.count} "
+        print(s)
     def init_inventory(self):
         for k,v in self.attr['inventory'].items():
             v.update({"id":k})
@@ -163,6 +181,10 @@ class Player:
         data = f'{{"poolId":"{pool_id}","useTkt":{use_ticket}}}'
         res = self.post('/gacha/advancedGacha', data)
         return res
+    def api_ten_advanced_gacha(self, pool_id, use_ticket):
+        data = f'{{"poolId":"{pool_id}","useTkt":{use_ticket}}}'
+        res = self.post('/gacha/tenAdvancedGacha', data)
+        return res
     def api_squad_formation(self, squad_id, slots, change_skill = 0):
         data = f'{{"squadId":"{squad_id}","slots":{json.dumps(slots, ensure_ascii = False)},"changeSkill":{change_skill}}}'
         res = self.post('/quest/squadFormation', data, player)
@@ -180,12 +202,20 @@ class Player:
         res = self.post('/activity/getActivityCheckInReward', data)
         return res
     def api_get_meta_info_list(self):
-        data = f'{{"from":{time.localtime()} }}'
+        data = f'{{"from":{int(time.time())}}}'
         res = self.post('/mail/getMetaInfoList', data)
         return res
-    def api_recieve_mail(self, mail_id, mail_type):
-        data = '{{"type":{mail_type},"mailId":{mail_id} }}'
+    def api_receive_mail(self, mail_id, mail_type):
+        data = f'{{"type":{mail_type},"mailId":{mail_id} }}'
         res = self.post('/mail/receiveMail', data)
+        return res
+    def api_receive_all_mail(self, mail_id_list, sys_mail_id_list):
+        data = f'{{"mailIdList":{mail_id_list},"sysMailIdList":{sys_mail_id_list}}}'
+        res = self.post('/mail/receiveAllMail', data)
+        return res
+    def api_list_mail_box(self, mail_id_list, sys_mail_id_list):
+        data = f'{{"mailIdList":{mail_id_list},"sysMailIdList":{sys_mail_id_list}}}'
+        res = self.post('/mail/listMailBox', data)
         return res
     def api_receive_social_point(self):
         res=self.post("/social/receiveSocialPoint",'{}')
