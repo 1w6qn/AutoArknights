@@ -18,10 +18,9 @@ class Player:
             if slot['maxFinishTs']>time.time():continue
             if slot['state']==2:
                 res=self.api_finish_normal_gacha(i)
-                print(res)
                 if not res['result']:
                     char_get=objects.Char(res["charGet"])
-                    report(f"公招完成 slotId:{i} {char_get.attr['isNew']}获得{char_get.name} 获得{char_get.attr['itemGet']}")
+                    report(f"公招完成 slotId:{i} {char_get.attr['isNew']}获得{char_get.name} 获得{self.print_items(char_get.attr['itemGet'])}")
             tag_list,special_tag_id,duration=self.select_tag(slot['tags'])
             self.api_normal_gacha(i,tag_list,special_tag_id,duration)
             report(f"公招成功 slotId:{i} tagList:{tag_list} duration:{duration}")
@@ -76,6 +75,27 @@ class Player:
         for i in buy_list:
             self.api_buy_social_good(good_list[i]['goodId'])
         report('获取信用商品成功')
+    def buy_social_good(self):
+        print(f"当前信用点:{self.attr['status']['socialPoint']}")
+        good_list=self.api_get_social_good_list()
+        unavail_list=self.get_unavail_social_good_list()
+        for i in range(0,len(good_list)):
+            good=good_list[i]
+            s=f"{i}. {good['displayName']}*{good['item']['count']} "
+            if not (good['price']<=self.attr['status']['socialPoint']):
+                s+=f"{color.RED}{good['price']}{color.RESET}"
+            else:
+                s+=f"{color.WHITE}{good['price']}{color.RESET}"
+            if good['discount']:
+                s+=f"{color.GREEN}-{good['discount']*100}%{color.RESET}"
+            if good['goodId'] in unavail_list:
+                s+="(unavail)"
+            print(s)
+        buy_list=[int(i)for i in input("请选择:").split()]
+        s=""
+        for i in buy_list:
+            s+=self.print_items(self.api_buy_social_good(good_list[i]['goodId'])['items'])
+        report(f'获取信用商品成功 获得{s}')
     def get_unavail_social_good_list(self):
         unavail_list=[]
         for i in self.attr['shop']['SOCIAL']['info']:
@@ -94,7 +114,7 @@ class Player:
         if not(norm and sys):
             r=self.api_receive_all_mail(norm,sys)
             report("邮件物品收取成功")
-            self.print_items(r['items'])
+            print(self.print_items(r['items']))
         else:report("无可收取邮件")
     def update_attr(self,new):
         if new.get("mission"):
@@ -108,7 +128,7 @@ class Player:
             f.write(json.dumps(self.attr))
     def update_mission(self,new):
         s=""
-        for type,missions in new.items():
+        for type,missions in new['missions'].items():
             if type=="DAILY":s+="日常任务更新"
             elif type=="WEEKLY":s+="周常任务更新"
             for id,data in missions.items():
@@ -123,7 +143,7 @@ class Player:
         for i in items:
             item=objects.Item(i)
             s+=f"{item.name}*{item.count} "
-        print(s)
+        return s
     def init_inventory(self):
         for k,v in self.attr['inventory'].items():
             v.update({"id":k})

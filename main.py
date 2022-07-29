@@ -9,7 +9,9 @@ def login(account,password,access_token):
     gs.game_login(aus)
     return player.Player(gs)
 def play(player):
+    p.check_in()
     p.auto_receive_mail()
     p.auto_recruit()
+    p.buy_social_good()
 p=load_from_json('./user.json')
 play(p)
