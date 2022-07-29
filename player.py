@@ -2,7 +2,7 @@ import config,json,objects,random,time,server
 from utils import *
 gacha_table=load_json('./zh_CN/gamedata/excel/gacha_table.json')
 class Player:
-    chars=[]
+    chars={}
     items={}
     attr={}
     def sync_data(self):
@@ -116,6 +116,12 @@ class Player:
             report("邮件物品收取成功")
             print(self.print_items(r['items']))
         else:report("无可收取邮件")
+    def get_meeting_room_reward(self):
+        res=self.api_get_meeting_room_reward([0,1])
+        count=0
+        for i in res['rewards']:
+            count+=i['count']
+        print(f"获得信用点*{count}")
     def update_attr(self,new):
         if new.get("mission"):
             self.update_mission(new['mission'])
@@ -144,17 +150,13 @@ class Player:
             item=objects.Item(i)
             s+=f"{item.name}*{item.count} "
         return s
-    def init_inventory(self):
-        for k,v in self.attr['inventory'].items():
-            v.update({"id":k})
-            self.items.update({k:objects.Item(v)})
     def get_inventory(self):
         return self.items
-    def init_chars(self):
-        for k,v in self.attr['troop']['chars'].items():
-            self.chars.append(objects.Char(v))
     def get_chars(self):
         return self.chars
+    def list_box(self):
+        for i in self.chars:
+            print(i)
     def __str__(self):
         return "uid:{}\n昵称:{}#{}\n等级:{}\n经验:{}".format(self.uid,self.attr['status']["nickName"],self.attr['status']['nickNumber'],self.attr['status']['level'],self.attr['status']['exp'])
     def __init__(self,gs,attr={}):
@@ -162,7 +164,7 @@ class Player:
         self.uid=gs.uid
         if attr:self.attr=attr
         else:self.sync_data()
-        self.init_chars()
+        
     def post(self,cgi,data):
         res=self.gs.post(cgi,data)
         if res.get("user"):self.update_attr(res["user"])
@@ -260,5 +262,9 @@ class Player:
         return res
     def api_evolve_char(self,char_inst_id):
         data=f'{{"charInstId":{char_inst_id}}}'
-        res = self.gs.post('/charBuild/evolveChar',data)
+        res = self.post('/charBuild/evolveChar',data)
+        return res
+    def api_get_meeting_room_reward(self,type):
+        data=f'{{"type":{type}}}'
+        res=self.post('/building/getMeetingroomReward',data)
         return res
