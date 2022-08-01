@@ -3,36 +3,41 @@ from utils import *
 item_table=load_json('./zh_CN/gamedata/excel/item_table.json')
 char_table=load_json('./zh_CN/gamedata/excel/character_table.json')
 mission_table=load_json('./zh_CN/gamedata/excel/mission_table.json')
+favor_table=load_json('./zh_CN/gamedata/excel/favor_table.json')
 game_const=load_json('./zh_CN/gamedata/excel/gamedata_const.json')
+favor_level=[]
+for i in favor_table['favorFrames']:favor_level.append(i['level'])
 class Char:
-    attr={}
     def update(self,new):
         old=str(self)
-        self.attr.update(new)
+        self.__dict__.update(new)
         print(f"{old} -> {str(self)}")
-    def get_max_exp(self):
-        if self.get_level()==self.get_max_level():
-            return 0
-        return game_const["characterExpMap"][self.get_evolve_phase()][self.get_level()-1]
-    def get_max_level(self):
-        return game_const["maxLevel"][self.get_rarity()][self.get_evolve_phase()]
-    def get_rarity(self):
-        return self.attr["rarity"]
-    def get_level(self):
-        return self.attr["level"]
-    def get_exp(self):
-        return self.attr["exp"]
-    def get_evolve_phase(self):
-        return self.attr["evolvePhase"]
-    def get_inst_id(self):
-        return self.attr["instId"]
+    @property
+    def maxExp(self):
+        if self.level==self.maxLevel:return 0
+        return game_const["characterExpMap"][self.evolvePhase][self.level-1]
+    @property
+    def maxLevel(self):
+        return game_const["maxLevel"][self.rarity][self.evolvePhase]
+    @property
+    def favorPercent(self):
+        if self.favorPoint in favor_level:return favor_level.index(self.favorPoint)
+        t=sorted(favor_level+[self.favorPoint])
+        return t.index(self.favorPoint)-1
+    @property
+    def name(self,colored=True):
+        name=self.__dict__['name']
+        if colored:return rcolor[self.rarity]+name+color.RESET
+        return name
+    def calc_exp_cost(self,target_level):
+        s=sum(game_const["characterExpMap"][self.evolvePhase][self.level-1:target_level])-self.exp
+        return s
     def __init__(self,data):
-        self.attr.update(data)
-        self.id=self.attr["charId"]
-        self.attr.update(char_table[self.id])
-        self.name=self.attr["name"]
+        self.__dict__.update(data)
+        self.id=self.charId
+        self.__dict__.update(char_table[self.id])
     def __str__(self):
-        return f"{self.name} 精{self.get_evolve_phase()} {self.get_level()}/{self.get_max_level()}级 {self.get_exp()}/{self.get_max_exp()}"
+        return f"{self.name.center(16)}{('精'+self.evolvePhase).center(4)}{(self.level+'/'+self.maxLevel+'级').center(8)}\t信赖{self.favorPercent}%/200%"
 class Item:
     attr={}
     def __init__(self,data):

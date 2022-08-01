@@ -2,9 +2,11 @@ import config,json,objects,random,time,server
 from utils import *
 gacha_table=load_json('./zh_CN/gamedata/excel/gacha_table.json')
 class Player:
-    chars={}
+    __chars=[]
     items={}
     attr={}
+    sort_type='rarity'
+    sort_reverse=True
     def sync_data(self):
         self.api_sync_data()
         self.api_sync_status()
@@ -20,7 +22,7 @@ class Player:
                 res=self.api_finish_normal_gacha(i)
                 if not res['result']:
                     char_get=objects.Char(res["charGet"])
-                    report(f"公招完成 slotId:{i} {char_get.attr['isNew']}获得{char_get.name} 获得{self.print_items(char_get.attr['itemGet'])}")
+                    report(f"公招完成 slotId:{i} {char_get.isNew}获得{char_get.name} 获得{self.print_items(char_get.itemGet)}")
             tag_list,special_tag_id,duration=self.select_tag(slot['tags'])
             self.api_normal_gacha(i,tag_list,special_tag_id,duration)
             report(f"公招成功 slotId:{i} tagList:{tag_list} duration:{duration}")
@@ -44,7 +46,7 @@ class Player:
         if 28 in tags:duration=13800
         return tags,sp_tag,duration
     def check_in(self):
-        if self.attr["checkIn"]["canCheckIn"]:
+        if not self.attr["checkIn"]["canCheckIn"]:
             report("已签到")
             return
         res=self.api_check_in()
@@ -79,6 +81,7 @@ class Player:
         print(f"当前信用点:{self.attr['status']['socialPoint']}")
         good_list=self.api_get_social_good_list()
         unavail_list=self.get_unavail_social_good_list()
+        afford_list=[]
         for i in range(0,len(good_list)):
             good=good_list[i]
             s=f"{i}. {good['displayName']}*{good['item']['count']} "
@@ -86,11 +89,13 @@ class Player:
                 s+=f"{color.RED}{good['price']}{color.RESET}"
             else:
                 s+=f"{color.WHITE}{good['price']}{color.RESET}"
+                afford_list.append(i)
             if good['discount']:
                 s+=f"{color.GREEN}-{good['discount']*100}%{color.RESET}"
             if good['goodId'] in unavail_list:
                 s+="(unavail)"
             print(s)
+        if afford_list is []:return
         buy_list=[int(i)for i in input("请选择:").split()]
         s=""
         for i in buy_list:
@@ -127,9 +132,8 @@ class Player:
             self.update_mission(new['mission'])
         merge_dict(self.attr,new)
         if new.get("troop",{}).get("chars"):
-            chars=new['troop']['chars']
-            for i in chars:
-                self.chars[int(i)-1].update(chars[i])
+            for k,v in new['troop']['chars'].items():
+                self.chars[k].update(v)
         with open('player.txt','w') as f:
             f.write(json.dumps(self.attr))
     def update_mission(self,new):
@@ -150,10 +154,17 @@ class Player:
             item=objects.Item(i)
             s+=f"{item.name}*{item.count} "
         return s
-    def get_inventory(self):
-        return self.items
-    def get_chars(self):
-        return self.chars
+    def char_val(self,char):
+        return char.__dict__[self.sort_type]
+    @property
+    def chars(self):
+        chars=self.__chars
+        return sorted(chars,key=self.char_val,reverse=self.sort_reverse)
+    @chars.setter
+    def chars(self,new):
+        self.__chars=new
+    def init_chars(self):
+        self.chars={objects.Char(v)for v in self.attr['troop']['chars'].values()}
     def list_box(self):
         for i in self.chars:
             print(i)
@@ -164,7 +175,7 @@ class Player:
         self.uid=gs.uid
         if attr:self.attr=attr
         else:self.sync_data()
-        
+        self.init_chars()
     def post(self,cgi,data):
         res=self.gs.post(cgi,data)
         if res.get("user"):self.update_attr(res["user"])
