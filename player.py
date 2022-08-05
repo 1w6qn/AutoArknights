@@ -2,11 +2,10 @@ import config,json,objects,random,time,server
 from utils import *
 gacha_table=load_json('./zh_CN/gamedata/excel/gacha_table.json')
 class Player:
-    __chars=[]
-    items={}
-    attr={}
-    sort_type='rarity'
-    sort_reverse=True
+    __chars={}
+    __items={}
+    __missions={}
+    __rooms={}
     def sync_data(self):
         self.api_sync_data()
         self.api_sync_status()
@@ -15,9 +14,10 @@ class Player:
     def auto_recruit(self):
         self.api_sync_normal_gacha()
         for i in range(0,4):
-            slot=self.attr['recruit']['normal']['slots'][str(i)]
+            slot=self.recruit['normal']['slots'][str(i)]
             if not slot['state']:continue
-            if slot['maxFinishTs']>time.time():continue
+            if slot['maxFinishTs']>self.time:continue
+            if self.status['recruitLicense']==0:return
             if slot['state']==2:
                 res=self.api_finish_normal_gacha(i)
                 if not res['result']:
@@ -46,14 +46,15 @@ class Player:
         if 28 in tags:duration=13800
         return tags,sp_tag,duration
     def check_in(self):
-        if not self.attr["checkIn"]["canCheckIn"]:
+        if not self.checkIn["canCheckIn"]:
             report("已签到")
             return
         res=self.api_check_in()
+        print(res)
         s="获得"
-        for i in res['signInReward']:
+        for i in res['signInRewards']:
             item=objects.Item(i)
-            s+=f" {item.name} {item.count}"
+            s+=str(item)
         report(f"签到成功 {s}")
     def auto_buy_social_good(self):
         good_list=self.api_get_social_good_list()
@@ -63,7 +64,7 @@ class Player:
         for i in range(0,len(good_list)):
             good=good_list[i]
             a+=good['price']
-            afford=(a<=self.attr['status']['socialPoint'])
+            afford=(a<=self.__dict__['status']['socialPoint'])
             s=f"{i}. {good['displayName']} "
             if not afford:
                 s+=f"{color.RED}{good['price']}{color.RESET}"
@@ -78,24 +79,23 @@ class Player:
             self.api_buy_social_good(good_list[i]['goodId'])
         report('获取信用商品成功')
     def buy_social_good(self):
-        print(f"当前信用点:{self.attr['status']['socialPoint']}")
+        print(f"当前信用点:{self.__dict__['status']['socialPoint']}")
         good_list=self.api_get_social_good_list()
         unavail_list=self.get_unavail_social_good_list()
         afford_list=[]
         for i in range(0,len(good_list)):
             good=good_list[i]
+            if good['goodId'] in unavail_list:continue
             s=f"{i}. {good['displayName']}*{good['item']['count']} "
-            if not (good['price']<=self.attr['status']['socialPoint']):
+            if not (good['price']<=self.status['socialPoint']):
                 s+=f"{color.RED}{good['price']}{color.RESET}"
             else:
                 s+=f"{color.WHITE}{good['price']}{color.RESET}"
                 afford_list.append(i)
             if good['discount']:
                 s+=f"{color.GREEN}-{good['discount']*100}%{color.RESET}"
-            if good['goodId'] in unavail_list:
-                s+="(unavail)"
             print(s)
-        if afford_list is []:return
+        if not afford_list :return
         buy_list=[int(i)for i in input("请选择:").split()]
         s=""
         for i in buy_list:
@@ -103,7 +103,7 @@ class Player:
         report(f'获取信用商品成功 获得{s}')
     def get_unavail_social_good_list(self):
         unavail_list=[]
-        for i in self.attr['shop']['SOCIAL']['info']:
+        for i in self.shop['SOCIAL']['info']:
             unavail_list.append(i['id'])
         return unavail_list
     def auto_confirm_missions(self):
@@ -127,55 +127,74 @@ class Player:
         for i in res['rewards']:
             count+=i['count']
         print(f"获得信用点*{count}")
+    def settle_manufacture(self):
+        room_slot_id_list=self.building['rooms']['MANUFACTURE']
+        self.api_settle_manufacture(room_slot_id_list,1)
     def update_attr(self,new):
         if new.get("mission"):
             self.update_mission(new['mission'])
-        merge_dict(self.attr,new)
+        merge_dict(self.__dict__,new)
         if new.get("troop",{}).get("chars"):
             for k,v in new['troop']['chars'].items():
-                self.chars[k].update(v)
-        with open('player.txt','w') as f:
-            f.write(json.dumps(self.attr))
+                self.__chars[k].update(v)
     def update_mission(self,new):
         s=""
         for type,missions in new['missions'].items():
             if type=="DAILY":s+="日常任务更新"
             elif type=="WEEKLY":s+="周常任务更新"
             for id,data in missions.items():
-                data.update({"id":id})
-                mission=objects.Mission(data)
-                progress=mission.attr['progress'][0]
-                s+=f"\n{mission.attr['description']} {progress['value']}/{progress['target']}"
+                mission=self.__missions[type][id]
+                mission.update(data)
+                progress=mission.progress[0]
+                s+=f"\n{mission.description} {progress['value']}/{progress['target']}"
                 if progress['value']==progress['target']:
                     s+='( 已完成 )'
     def print_items(self,items):
         s=""
         for i in items:
             item=objects.Item(i)
-            s+=f"{item.name}*{item.count} "
+            s+=str(item)
         return s
-    def char_val(self,char):
-        return char.__dict__[self.sort_type]
+    @property
+    def time(self):
+        return int(time.time())
+    def sort(self,l,type):
+        return sorted(chars,key=lambda x:x.__dict__[self.sort[type]['type']],reverse=self.sort[type]['reverse'])
     @property
     def chars(self):
-        chars=self.__chars
-        return sorted(chars,key=self.char_val,reverse=self.sort_reverse)
-    @chars.setter
-    def chars(self,new):
-        self.__chars=new
+        chars=self.__chars.values()
+        return self.sort(chars,'char')
     def init_chars(self):
-        self.chars={objects.Char(v)for v in self.attr['troop']['chars'].values()}
+        self.__chars={k:objects.Char(v)for k,v in self.__dict__['troop']['chars'].items()}
     def list_box(self):
         for i in self.chars:
             print(i)
+    @property
+    def rooms(self):return self.__rooms
+    def init_rooms(self):
+        for slotId,data in self.building['roomSlots'].items():
+            room=objects.Room({'slotId':slotId}|data)
+            room.update(self.building['rooms'][room.roomId][slotId])
+            self.__rooms.update({slotId:room})
+    @property
+    def missions(self):return self.__missions
+    def init_missions(self):
+        for type,missions in self.mission['missions'].items():
+            self.__missions.update({type:{}})
+            for id,data in missions.items():
+                data.update({"type":type,"id":id})
+                mission=objects.Mission(data)
+                self.__missions[type].update({id:mission})
     def __str__(self):
-        return "uid:{}\n昵称:{}#{}\n等级:{}\n经验:{}".format(self.uid,self.attr['status']["nickName"],self.attr['status']['nickNumber'],self.attr['status']['level'],self.attr['status']['exp'])
+        return "uid:{}\n昵称:{}#{}\n等级:{}\n经验:{}".format(self.uid,self.status["nickName"],self.status['nickNumber'],self.status['level'],self.status['exp'])
     def __init__(self,gs,attr={}):
         self.gs=gs
         self.uid=gs.uid
-        if attr:self.attr=attr
+        sort_config={'char':{'type':'rarity','reverse':True},'item':{'type':'sortId','reverse':True}}
+        if attr:self.__dict__=attr
         else:self.sync_data()
         self.init_chars()
+        self.init_missions()
     def post(self,cgi,data):
         res=self.gs.post(cgi,data)
         if res.get("user"):self.update_attr(res["user"])
@@ -184,7 +203,8 @@ class Player:
     def api_sync_data(self):
         data=f'{{"platform":{config.PLATFORM}}}'
         res=self.gs.post("/account/syncData",data)
-        merge_dict(self.attr,res['user'])
+        if 'user' in res:merge_dict(self.__dict__,res['user'])
+        else:self.update_attr(res)
         return res
     def api_sync_status(self):
         data =f'{{"modules":{config.MODULES},"params":{{"16":{{"goodIdMap":{{"LS":[],"HS":[],"ES":[],"CASH":[],"GP":["GP_Once_1"],"SOCIAL":[]}}}}}}}}'
@@ -201,8 +221,16 @@ class Player:
         res=self.post('/gacha/normalGacha',data)
         return res
     def api_finish_normal_gacha(self,slot_id):
-        data='{{"slotId":{}}}'.format(slot_id)
+        data=f'{{"slotId":{slot_id}}}'
         res=self.post('/gacha/finishNormalGacha',data)
+        return res
+    def api_cancle_normal_gacha(self,slot_id):
+        data=f'{{"slotId":{slot_id}}}'
+        res=self.post('/gacha/cancleNormalGacha',data)
+        return res
+    def api_boost_normal_gacha(self,slot_id,buy):
+        data=f'{{"slotId":{slot_id},"buy":{buy}}}'
+        res=self.post('/gacha/boostNormalGacha',data)
         return res
     def api_get_unconfirmed_order_id_list(self):
         res=self.post('/pay/getUnconfirmedOrderIdList','{}')
@@ -226,7 +254,7 @@ class Player:
         data = f'{{"missionId":"{mission_id}"}}'
         res = self.post('/mission/confirmMission', data)
         return res
-    def api_auto_confirm_mission(self, type):
+    def api_auto_confirm_missions(self, type):
         data = f'{{"type":"{type}"}}'
         res = self.post('/mission/autoConfirmMissions', data)
         return res
@@ -235,7 +263,7 @@ class Player:
         res = self.post('/activity/getActivityCheckInReward', data)
         return res
     def api_get_meta_info_list(self):
-        data = f'{{"from":{int(time.time())}}}'
+        data = f'{{"from":{self.time}}}'
         res = self.post('/mail/getMetaInfoList', data)
         return res
     def api_receive_mail(self, mail_id, mail_type):
@@ -275,7 +303,27 @@ class Player:
         data=f'{{"charInstId":{char_inst_id}}}'
         res = self.post('/charBuild/evolveChar',data)
         return res
+    def api_boost_potential(self,char_inst_id,item_id,target_rank):
+        data=f'{{"charInstId":{char_inst_id},"itemId":{item_id},"targetRank":{target_rank}}}'
+        res=self.post('/charBuild/boostPotential',data)
+        return res
+    def api_upgrade_skill(self,char_inst_id,target_level):
+        data=f'{{"charInstId":{char_inst_id},"targetLevel":{target_level}}}'
+        res=self.post('/charBuild/upgradeSkill',data)
+        return res
+    def api_settle_manufacture(self,room_slot_id_list,supplement):
+        data=f'{{"roomSlotIdList":{room_slot_id_list},"supplement":{supplement}}}'
+        res=self.post('/building/settleManufacture',data)
+        return res
     def api_get_meeting_room_reward(self,type):
         data=f'{{"type":{type}}}'
         res=self.post('/building/getMeetingroomReward',data)
+        return res
+    def api_recycle_charms(self,activity_id):
+        data=f'{{"activityId":"{activity_id}"}}'
+        res=self.post('/activity/recycleCharms',data)
+        return res
+    def api_template_shop_get_good_list(self,activity_id):
+        data=f'{{"activityId":"{activity_id}"}}'
+        res=self.post('/templateShop/getGoodList',data)
         return res

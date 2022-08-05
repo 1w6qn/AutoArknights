@@ -36,6 +36,7 @@ class AuthServer:
     def get_token(self,channel_id='1',sub_channel='1',world_id='1'):
         data={"appId":config.APP_ID,"channelId":channel_id,"deviceId":self.device_id,"deviceId2":self.device_id2,"deviceId3":self.device_id3,"extension":json.dumps({"uid":self.channel_uid,"access_token":self.access_token}),"platform":config.PLATFORM,"subChannel":sub_channel,"worldId":world_id}
         j=self.post("/u8/user/getToken",data)
+        print(j)
         utils.report(f"登录成功 uid:{j['uid']} token:{j['token']}")
         return j['uid'],j['token']
 class GameServer:
