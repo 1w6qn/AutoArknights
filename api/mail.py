@@ -1,17 +1,17 @@
 from api import bind
 import time
 @bind("/mail/listMailBox")
-def listMailBox(mailList:list,sysMailList):->dict
+def listMailBox(mailList,sysMailList):
     return {"mailList":mailList,"sysMailList":sysMailList}
 @bind("/mail/receiveMail")
-def receiveMail(type:str,mailId:str):->dict
+def receiveMail(type,mailId):
     return {"type":type,"mailId":mailId}
 @bind("/mail/getMetaInfoList")
-def getMetaInfoList():->dict
+def getMetaInfoList():
     return {"from":int(time.time())}
 @bind("/mail/receiveAllMail")
-def receiveAllMail(mailList:list,sysMailList):->dict
+def receiveAllMail(mailList,sysMailList):
     return {"mailList":mailList,"sysMailList":sysMailList}
 @bind("/mail/removeAllReceivedMail")
-def removeAllReceivedMail():->dict
+def removeAllReceivedMail():
     return {}

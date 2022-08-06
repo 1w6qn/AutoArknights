@@ -1,4 +1,5 @@
-import api
+import api,json
+import config
 def bind(cgi):
     return api.bind(cgi,auth=True)
 @bind("/user/login")
@@ -14,7 +15,7 @@ def auth(token):
 def sendSmsCode(account,captcha,type):
     return {"account":account,"captcha":captcha,"type":type}
 @bind("/u8/user/getToken")
-def getToken(appId,channelId,deviceId,deviceId2,deviceId3,uid,access_token,platform,subChannel,worldId):
+def getToken(deviceId,deviceId2,deviceId3,uid,access_token,appId=config.APP_ID,channelId='1',platform=config.PLATFORM,subChannel='1',worldId='1',**kwargs):
     return {"appId":appId,"channelId":channelId,"deviceId":deviceId,"deviceId2":deviceId2,"deviceId3":deviceId3,"extension":json.dumps({"uid":uid,"access_token":access_token}),"platform":platform,"subChannel":subChannel,"worldId":worldId}
 """
 		"/user/register"; 
@@ -30,3 +31,4 @@ def getToken(appId,channelId,deviceId,deviceId2,deviceId3,uid,access_token,platf
 		"/user/changePhoneCheck"; 
 		"/user/changePhone"; 
 		"""
+		

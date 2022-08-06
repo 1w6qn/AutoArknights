@@ -1,8 +1,8 @@
 import json
 from utils import *
 item_table=load_json('./zh_CN/gamedata/excel/item_table.json')
-char_table=load_json('./zh_CN/gamedata/excel/character_table.json')
 mission_table=load_json('./zh_CN/gamedata/excel/mission_table.json')
+char_table=load_json('./zh_CN/gamedata/excel/character_table.json')
 favor_table=load_json('./zh_CN/gamedata/excel/favor_table.json')
 game_const=load_json('./zh_CN/gamedata/excel/gamedata_const.json')
 activity_table=load_json('./zh_CN/gamedata/excel/activity_table.json')

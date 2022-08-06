@@ -6,13 +6,9 @@ from utils import u8_sign
 path = os.getcwd() + '/api/'
 files = os.listdir(path)
 __all__ = []
+player=None
 for i in files:
     __all__.append(i.replace('.py', ''))
-class GameServer:
-    uid=""
-    secert=""
-    seqnum=0
-gs=GameServer()
 def post(cgi,data,auth,server):
     if auth:
         signstr=""
@@ -22,17 +18,16 @@ def post(cgi,data,auth,server):
         headers=config.COMMON_HEADER
     else:
         url=config.HOST['GAME']+cgi
-        headers=config.COMMON_HEADER|{"uid":server.uid,"secret":server.secret,"seqnum":server.seqnum}
+        headers=config.COMMON_HEADER|server.__dict__
     res= requests.post(url,data=json.dumps(data),headers=headers)
     if auth:return res.json()
-    if 'seqnum' in res.headers.keys() and res.headers['seqnum'].isdigit():server.seqnum=int(res.headers['seqnum'])
-    else:server.seqnum+=1
+    if 'seqnum' in res.headers.keys() and res.headers['seqnum'].isdigit():server.seqnum=str(int(res.headers['seqnum']))
+    else:server.seqnum=str(int(server.seqnum)+1)
     return res.json()
 def bind(cgi,auth=False):
-    global gs
     def deco(func):
         def wrapper(*args,**kwargs):
-            res=post(cgi,func(*args,**kwargs),auth,None if auth else gs)
+            res=post(cgi,func(*args,**kwargs),auth,None if not player else player.gs)
             return res
         return wrapper
     return deco

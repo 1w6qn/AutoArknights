@@ -1,50 +1,50 @@
 from api import bind
 @bind("/charBuild/evolveChar")
-def evolveChar(charInstId:str)->dict :
+def evolveChar(charInstId):
     return {"charInstId":charInstId}
 @bind("/charBuild/upgradeChar")
-def evolveChar(charInstId:str,expMats:list)->dict :
+def evolveChar(charInstId,expMats):
     return {"charInstId":charInstId,"expMats":expMats}
 @bind("/charBuild/setDefaultSkill")
-def setDefaultSkill(charInstId:str,defaultSkillIndex:int)->dict :
-    return {"charInstId":charInstId,"defaultSkillIndex:int":defaultSkillIndex}
+def setDefaultSkill(charInstId,defaultSkillIndex):
+    return {"charInstId":charInstId,"defaultSkillIndex":defaultSkillIndex}
 @bind("/charBuild/boostPotential")
-def boostPotential(charInstId:str,itemId:str,targetRank:int)->dict :
+def boostPotential(charInstId,itemId,targetRank):
     return {"charInstId":charInstId,"itemId":itemId,"targetRank":targetRank}
 @bind("/charBuild/upgradeSkill")
-def upgradeSkill(charInstId:str,targetLevel:int)->dict :
+def upgradeSkill(charInstId,targetLevel):
     return {"charInstId":charInstId,"targetLevel":targetLevel}
 @bind("/charBuild/changeCharSkin")
-def changeCharSkin(charInstId:str,skinId:str)->dict :
+def changeCharSkin(charInstId,skinId):
     return {"charInstId":charInstId,"skinId":skinId}
 @bind("/charBuild/changeCharTemplate")
-def changeCharTemplate(charInstId:str,templateId:str)->dict :
+def changeCharTemplate(charInstId,templateId):
     return {"charInstId":charInstId,"templateId":templateId}
 @bind("/charBuild/changeCharSkin")
-def changeCharSkin(charInstId:str,skinId:str)->dict :
+def changeCharSkin(charInstId,skinId):
     return {"charInstId":charInstId,"skinId":skinId}
 @bind("/charBuild/getSpCharMissionReward")
-def getSpCharMissionReward(charId:str,missionId:str)->dict :
+def getSpCharMissionReward(charId,missionId):
     return {"charId":charId,"missionId":missionId}
 @bind("/charBuild/evolveCharUseItem")
-def evolveCharUseItem(charInstId:str,itemId:str,instId:str)->dict :
+def evolveCharUseItem(charInstId,itemId,instId):
     return {"charInstId":charInstId,"itemId":itemId,"instId":instId}
 @bind("/charBuild/setEquipment")
-def setEquipment(charInstId:str,templateId:str,equipId:str)->dict :
+def setEquipment(charInstId,templateId,equipId):
     return {"charInstId":charInstId,"templateId":templateId,"equipId":equipId}
 @bind("/charBuild/unlockEquipment")
-def unlockEquipment(charInstId:str,templateId:str,equipId:str)->dict :
+def unlockEquipment(charInstId,templateId,equipId):
     return {"charInstId":charInstId,"templateId":templateId,"equipId":equipId}
 @bind("/charBuild/addonStory/unlock")
-def addonStory_unlock(charId:str,storyId:str)->dict :
+def addonStory_unlock(charId,storyId):
     return {"charId":charId,"storyId":storyId}
 @bind("/charBuild/addonStage/battleStart")
 def addonStage_battleStart():return {}
 @bind("/charBuild/addonStage/battleFinish")
 def addonStage_battleFinish():return {}
 @bind("/charBuild/batchSetCharVoiceLan")
-def batchSetCharVoiceLan(voiceLan:str):
+def batchSetCharVoiceLan(voiceLan):
     return {"voiceLan":voiceLan}
 @bind("/charBuild/setCharVoiceLan")
-def setCharVoiceLan(charList:list,voiceLan:str):
+def setCharVoiceLan(charList,voiceLan):
     return {"charList":charList,"voiceLan":voiceLan}
