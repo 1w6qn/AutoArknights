@@ -18,16 +18,19 @@ def post(cgi,data,auth,server):
         headers=config.COMMON_HEADER
     else:
         url=config.HOST['GAME']+cgi
-        headers=config.COMMON_HEADER|server.__dict__
+        headers=config.COMMON_HEADER|server.attr
     res= requests.post(url,data=json.dumps(data),headers=headers)
-    if auth:return res.json()
+    j=res.json()
+    if auth:return j
+    if 'secret' in j:server.secret=j['secret']
     if 'seqnum' in res.headers.keys() and res.headers['seqnum'].isdigit():server.seqnum=str(int(res.headers['seqnum']))
     else:server.seqnum=str(int(server.seqnum)+1)
-    return res.json()
+    return j
 def bind(cgi,auth=False):
     def deco(func):
         def wrapper(*args,**kwargs):
-            res=post(cgi,func(*args,**kwargs),auth,None if not player else player.gs)
+            keys=dict(filter(lambda x:x[0] in func.__code__.co_varnames,**kwargs))
+            res=post(cgi,func(*args,**keys),auth,None if not player else player.gs)
             return res
         return wrapper
     return deco
