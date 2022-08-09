@@ -6,8 +6,8 @@ def bind(cgi):
 def login(account,password,deviceId,platform):
     return {"account":account,"password":password,"deviceId":deviceId,"platform":platform}
 @bind("/user/auth")
-def auth(token):
-    return {"token":token}
+def auth(access_token):
+    return {"token":access_token}
 #"/pay/createOrderAppstore"; 
 #"/pay/confirmOrderAppstore"; 
 #"/pay/confirmOrderAppstoreNew"; 
@@ -15,8 +15,8 @@ def auth(token):
 def sendSmsCode(account,captcha,type):
     return {"account":account,"captcha":captcha,"type":type}
 @bind("/u8/user/getToken")
-def getToken(deviceId,deviceId2,deviceId3,uid,access_token,appId=config.APP_ID,channelId='1',platform=config.PLATFORM,subChannel='1',worldId='1'):
-    return {"appId":appId,"channelId":channelId,"deviceId":deviceId,"deviceId2":deviceId2,"deviceId3":deviceId3,"extension":json.dumps({"uid":uid,"access_token":access_token}),"platform":platform,"subChannel":subChannel,"worldId":worldId}
+def getToken(deviceId,deviceId2,deviceId3,channel_uid,access_token,appId=config.APP_ID,channelId='1',platform=config.PLATFORM,subChannel='1',worldId='1'):
+    return {"appId":appId,"channelId":channelId,"deviceId":deviceId,"deviceId2":deviceId2,"deviceId3":deviceId3,"extension":json.dumps({"uid":channel_uid,"access_token":access_token}),"platform":platform,"subChannel":subChannel,"worldId":worldId}
 """
 		"/user/register"; 
 		"/user/authenticateUserIdentity"; 

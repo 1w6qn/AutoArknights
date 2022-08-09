@@ -6,7 +6,6 @@ from utils import u8_sign
 path = os.getcwd() + '/api/'
 files = os.listdir(path)
 __all__ = []
-player=None
 for i in files:
     __all__.append(i.replace('.py', ''))
 def post(cgi,data,auth,server):
@@ -28,9 +27,9 @@ def post(cgi,data,auth,server):
     return j
 def bind(cgi,auth=False):
     def deco(func):
-        def wrapper(*args,**kwargs):
-            keys=dict(filter(lambda x:x[0] in func.__code__.co_varnames,**kwargs))
-            res=post(cgi,func(*args,**keys),auth,None if not player else player.gs)
+        def wrapper(gs=None,*args,**kwargs):
+            keys=dict(filter(lambda x:x[0] in func.__code__.co_varnames,kwargs.items()))
+            res=post(cgi,func(*args,**keys),auth,None if not gs else gs)
             return res
         return wrapper
     return deco

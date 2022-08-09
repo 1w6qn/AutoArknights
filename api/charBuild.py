@@ -3,7 +3,7 @@ from api import bind
 def evolveChar(charInstId):
     return {"charInstId":charInstId}
 @bind("/charBuild/upgradeChar")
-def evolveChar(charInstId,expMats):
+def upgradeChar(charInstId,expMats):
     return {"charInstId":charInstId,"expMats":expMats}
 @bind("/charBuild/setDefaultSkill")
 def setDefaultSkill(charInstId,defaultSkillIndex):
@@ -20,9 +20,6 @@ def changeCharSkin(charInstId,skinId):
 @bind("/charBuild/changeCharTemplate")
 def changeCharTemplate(charInstId,templateId):
     return {"charInstId":charInstId,"templateId":templateId}
-@bind("/charBuild/changeCharSkin")
-def changeCharSkin(charInstId,skinId):
-    return {"charInstId":charInstId,"skinId":skinId}
 @bind("/charBuild/getSpCharMissionReward")
 def getSpCharMissionReward(charId,missionId):
     return {"charId":charId,"missionId":missionId}

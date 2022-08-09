@@ -25,13 +25,7 @@
 		"/story/finishStory"; 
 		
 		
-		"/user/bindNickName"; 
-		"/user/buyAp"; 
-		"/user/exchangeDiamondShard"; 
-		"user/changeResume"; 
-		"/user/useItem"; 
-		"/user/useItems"; 
-		"/user/useRenameCard"; 
+
 		"/depot/getVoucherDetail"; 
 		"/depot/voucherGacha"; 
 		"/depot/getCharGachaVoucherDetail"; 
@@ -55,9 +49,7 @@
 		"/social/setCardShowMedal"; 
 		"/medal/rewardMedal"; 
 		"/medal/setCustomData"; 
-		"/user/checkIn"; 
-		"/user/changeSecretary"; 
-		"/user/receiveTeamCollectionReward"; 
+		
 		"/mission/exchangeMissionRewards"; 
 		"mission/confirmMission"; 
 		"mission/confirmMissionGroup"; 
@@ -92,7 +84,7 @@
 		"shop/useVoucherSkin"; 
 		"templateShop/getGoodList"; 
 		"templateShop/buyGood"; 
-		"/user/changeAvatar"; 
+
 		"/background/setBackground"; 
 		"crisis/battleStart"; 
 		"crisis/battleFinish"; 

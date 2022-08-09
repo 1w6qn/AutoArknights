@@ -3,9 +3,10 @@ import json
 import utils
 class Player:
     dump_list=['account','password','access_token','platform']
+    def init_data(self,data):
+        self.data=object.playerData.PlayerData(data)
     def __init__(self,account,password,access_token=""):
         self.gs=object.gameServer.GameServer()
-        self.data=object.playerData.PlayerData()
         self.account=account
         self.password=password
         self.access_token=access_token
@@ -20,4 +21,4 @@ class Player:
         return [cls(**i)for i in j]
     @property
     def attr(self):return self.__dict__
-    def dump(self):return dict(filter(lambda x:x[0] in self.dump_list,self.attr))
+    def dump(self):return dict(filter(lambda x:x[0] in self.dump_list,self.attr.items()))
