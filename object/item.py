@@ -1,5 +1,5 @@
 from utils import *
-item_table=load_json('./zh_CN/gamedata/excel/item_table.json')
+item_table=load_json('./gamedata/zh_CN/gamedata/excel/item_table.json')
 class Item:
     @property
     def name(self):
