@@ -1,7 +1,10 @@
 from utils import *
 from object.character import Character
+from object.item import Item
 class PlayerData:
-    __chars=[]
+    @property
+    def items(self):
+        return list(filter(lambda x:x.__dict__[item_filter["key"]],__items))
     @property
     def chars(self):
         key=self.sort_list|{"key":lambda x:x.__dict__[self.sort_list['key']]}
@@ -10,9 +13,10 @@ class PlayerData:
         for i in self.chars:print(i)
     def __init__(self,data):
         self.__dict__.update(data)
-        #self.__chars=list(range(1,data['troop']['curCharInstId']))
         self.sort_list={"key":"rarity","reverse":True}
+        self.item_filter={"key":"sortId"}
         self.__chars=[Character(v)for k,v in data['troop']['chars'].items()]
+        self.__items=[Item({"id":k,"cnt":v})for k,v in data['inventory'].items()]
     def update(self,new):
         modified=new['modified']
         merge_dict(self.__dict__,modified)

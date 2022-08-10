@@ -16,7 +16,7 @@ def normalGacha(slotId,tagList,specialTagId,duration):
     return {"slotId":slotId,"tagList":tagList,"specialTagId":specialTagId,"duration":duration}
 @bind("/gacha/boostNormalGacha")
 def boostNormalGacha(slotId,buy):
-    return {"slotId":slotId,"buy"buy}
+    return {"slotId":slotId,"buy":buy}
 @bind("/gacha/getPoolDetail")
 def getPoolDetail():
     return {}

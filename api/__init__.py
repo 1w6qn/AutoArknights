@@ -33,3 +33,4 @@ def bind(cgi,auth=False):
             return res
         return wrapper
     return deco
+from api import *
