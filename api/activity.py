@@ -11,3 +11,6 @@ def tryGetCharmFirstReward(activityId):
 @bind("/activity/recycleCharms")
 def recycleCharms(activityId):
     return{"activityId":activityId}
+@bind("/activity/getActivityCheckInReward")
+def getActivityCheckInReward(activityId,index):
+    return {"activityId":activityId,"index":index}

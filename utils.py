@@ -47,8 +47,10 @@ def get_from_conf(url):
     return requests.get(url,headers=config.COMMON_HEADER).json()
 def update_config():
     res=get_from_conf(config.HOST['CONFIG']+"/config/prod/official/network_config")
-    config.NETWORK_VERSION=json.loads(res["content"])["configVer"]
-    v=get_from_conf(config.HOST['VERSION'])
+    content=json.loads(res["content"])
+    config.NETWORK_VERSION,func_ver=content["configVer"],content["funcVer"]
+    config.NETWORK_CONFIG=content['configs'][func_ver]['network']
+    v=get_from_conf(config.NETWORK_CONFIG['hv'].format(config.PLATFORM_ID))
     config.RES_VERSION,config.CLIENT_VERSION=v['resVersion'],v['clientVersion']
     report(f"资源更新成功 ResVersion:{config.RES_VERSION} ClientVersion:{config.CLIENT_VERSION}")
 update_config()

@@ -16,25 +16,7 @@ COMMON_HEADER ={
     'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 6.0.1; X Build/V417IR)',
     'Connection': 'Keep-Alive'
 }
-PASSPORT_HEADER = {
-    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-    'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 6.0.1; X Build/V417IR)',
-    'Connection': 'Keep-Alive'
-}
-if (SERVER == 'JP'):
-    HOST["PASSPORT"]= 'https://passport.arknights.jp'
-    HOST["AUTH"] = 'https://as.arknights.jp'
-    HOST["GAME"]= 'https://gs.arknights.jp:8443'
-    HOST["CONFIG"]= 'https://ak-conf.arknights.jp'
-    HOST["VERSION"] = "https://ark-jp-static-online.yo-star.com/assetbundle/official/{}/version".format(PLATFORM_ID)
-elif (SERVER == 'US'):
-    HOST["PASSPORT"] = 'https://passport.arknights.global'
-    HOST["AUTH"]= 'https://as.arknights.global'
-    HOST["GAME"]= 'https://gs.arknights.global:8443'
-    HOST["CONFIG"]= 'https://ak-conf.arknights.global'
-    HOST["VERSION"]= "https://ark-us-static-online.yo-star.com/assetbundle/official/{}/version".format(PLATFORM_ID)
-else:
-    HOST["AUTH"] = 'https://as.hypergryph.com'
-    HOST["GAME"]= 'https://ak-gs-gf.hypergryph.com'
-    HOST["CONFIG"]= 'https://ak-conf.hypergryph.com'
-    HOST["VERSION"]= "https://ak-conf.hypergryph.com/config/prod/official/{}/version".format(PLATFORM_ID)
+NETWORK_CONFIG={}
+if (SERVER == 'JP'):HOST["CONFIG"]= 'https://ak-conf.arknights.jp'
+elif (SERVER == 'US'):HOST["CONFIG"]= 'https://ak-conf.arknights.global'
+else:HOST["CONFIG"]= 'https://ak-conf.hypergryph.com'

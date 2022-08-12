@@ -13,10 +13,10 @@ def post(cgi,data,auth,server):
         signstr=""
         for k,v in data.items():signstr+=f"{k}={v}&"
         data.update({"sign":u8_sign(signstr[:-1])})
-        url=config.HOST['AUTH']+cgi
+        url=config.NETWORK_CONFIG['as']+cgi
         headers=config.COMMON_HEADER
     else:
-        url=config.HOST['GAME']+cgi
+        url=config.NETWORK_CONFIG['gs']+cgi
         headers=config.COMMON_HEADER|server.attr
     res= requests.post(url,data=json.dumps(data),headers=headers)
     j=res.json()
