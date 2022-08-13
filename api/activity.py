@@ -1,4 +1,10 @@
 from api import bind
+@bind("/activity/prayOnly/getReward")
+def prayOnly_getReward(activityId,prayArray):
+    return{"activityId":activityId,"prayArray":prayArray}
+@bind("/activity/loginOnly/getReward")
+def loginOnly_getReward(activityId):
+    return{"activityId":activityId}
 @bind("/activity/gridGacha/gacha")
 def gridGacha_gacha(activityId):
     return{"activityId":activityId}
