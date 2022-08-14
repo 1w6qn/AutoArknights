@@ -1,6 +1,7 @@
 import log
 import random
 from object.activity import Activity
+from object.item import items2str
 def check_in(player,act):
     act=Activity(act[1]|{"id":act[0]})
     if 1 not in act.history:
@@ -11,7 +12,8 @@ def check_in(player,act):
         res=player.api.activity.getActivityCheckInReward(player.gs,act.id,i)
         print(res)
         player.data.update(res['playerDataDelta'])
-        log.d(f"{act.name}第{i+1}天签到成功")
+        item_get=res['items']
+        log.d(f"{act.name}第{i+1}天签到成功 获得 {items2str(item_get)}}")
 def get_login_reward(player,act):
     act=Activity(act[1]|{"id":act[0]})
     if not act.reward:
@@ -29,6 +31,6 @@ def get_pray_reward(player,act):
         return
     pray_array=[random.randint(0,11)for i in range(count)]
     res=player.api.activity.prayOnly_getReward(player.gs,act.id,pray_array)
-    print(res)
+    item_get=res['rewards']
     player.data.update(res['playerDataDelta'])
-    log.d(f"{act.name}签到成功")
+    log.d(f"{act.name}签到成功 获得{items2str(item_get)}")

@@ -1,6 +1,7 @@
 import log
 import time
 import object.character as ch
+from object.item import items2str
 from utils import *
 from itertools import combinations as cb
 recruit_pool={}
@@ -31,19 +32,27 @@ for i in filter(recr_filter,ch.char_table.items()):
     if r:tag_list+=[r]
     recruit_pool.update({name:{'tagList':tag_list,'rarity':rarity}})
 log.d("公招初始化成功")
-def auto_recruit(player):
+def auto_finish_recruit(player):
     for id,slot in player.data.recruit['normal']['slots'].items():
         if not slot['state']:continue
         if slot['state']==2 and time.time()>=slot['maxFinishTs']:
             r=player.api.gacha.finishNormalGacha(player.gs,id)
             log.d(f"公招#{int(id)+1}完成")
+            player.data.update(r['playerDataDelta']) 
+def auto_recruit(player):
+    for id,slot in player.data.recruit['normal']['slots'].items():
+        if not slot['state']:continue
+        if slot['state']==2 and time.time()>=slot['maxFinishTs']:
+            r=player.api.gacha.finishNormalGacha(player.gs,id)
+            char_get=ch.Character(r['charGet'])
+            item_get=r['charGet']['itemGet']
+            log.d(f"公招#{int(id)+1}完成 {char_get.isNew}获得{char_get.name} 获得 {items2str(item_get)}")
             player.data.update(r['playerDataDelta'])
         if not player.data.status['recruitLicense']:
             log.d("调用凭证不足")
             return
         tags,sp_tag,duration=auto_select_tags(slot['tags'])
         res=player.api.gacha.normalGacha(player.gs,id,tags,sp_tag,duration)
-        print(res)
         player.data.update(res['playerDataDelta'])
         log.d(f"公招#{int(id)+1} 成功, 选中{tags}, 时长{duration}")
 def calc_all(tags,chars):
@@ -84,8 +93,12 @@ def auto_select_tags(tags):
     res=[name_tags[i]for i in result]
     if r>2:duration=32400
     return res,sp_tag,duration
-def advanced_gacha(player,pool_id,tkt):#0no 1normal 3free
+def advanced_gacha(player,pool_id):#0no 1normal 3free
+    if pool_id[0:7]=='LIMITED' and player.data.gacha['limit'][pool_id]['leastFree']:tkt=3
+    elif player.status['gachaTicket']:tkt=1
+    else:tkt=0
     r= player.api.gacha.advancedGacha(player.gs,pool_id,tkt)
     char_get=ch.Character(r['charGet'])
-    print(f"{pool_id}单抽成功 {char_get.isNew}获得{char_get.name}")
+    item_get=r['charGet']['itemGet']
+    print(f"{pool_id}单抽成功 {char_get.isNew}获得{char_get.name} 获得 {items2str(item_get)}")
     player.data.update(r['playerDataDelta'])

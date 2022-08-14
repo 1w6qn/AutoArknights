@@ -14,3 +14,9 @@ class Item:
     def __str__(self):
         table="{0}*{1} "
         return table.format(f"{self.name}",f"{self.count}")
+def items2str(items):
+    s=''
+    for i in items:
+        item=Item(i)
+        s+=str(item)
+    return s

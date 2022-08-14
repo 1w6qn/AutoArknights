@@ -40,6 +40,9 @@ class Character:
         name=self.__dict__['name']
         if self.colored:return rcolor[self.rarity]+name+color.RESET
         return name
+    @property
+    def isNew(self):
+        return '新'if self.__dict__['isNew']else '重复'
     def calc_exp_cost(self,target_level):
         s=sum(game_const["characterExpMap"][self.evolvePhase][self.level-1:target_level])-self.exp
         return s

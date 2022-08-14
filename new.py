@@ -22,6 +22,10 @@ def play(p):
         dev.activity.get_login_reward(p,list(act.items())[0])
     else:
         log.d('无可用登录活动')
+    if p.data.pushFlags['hasGifts']:
+        dev.mail.auto_receive_mails(p)
+    else:
+        log.d ("无可收取邮件")
     dev.gacha.auto_recruit(p)
 if __name__=='__main__':
     p=player.Player.load_from_json('user.json')[0]

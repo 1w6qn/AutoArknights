@@ -1,5 +1,5 @@
 def evolve(player,char):
-    player.api.charBuild.evolveChar(char.instId)
+    player.api.charBuild.evolveChar(player.gs,char.instId)
 def upgrade(player,char,target):
     delta=char.calc_exp_cost(target)
     exp_mats=[{"id":"2004","count":0},{"id":"2003","count":0},{"id":"2002","count":0},{"id":"2001","count":0}]
@@ -13,4 +13,4 @@ def upgrade(player,char,target):
         cnt=min(delta//weight,cur)
         delta-=cnt*weight
         exp_mats[i]["count"]+=cnt
-    player.api.charBuild.upgradeChar(char.instId,exp_mats)
+    player.api.charBuild.upgradeChar(player.gs,char.instId,exp_mats)

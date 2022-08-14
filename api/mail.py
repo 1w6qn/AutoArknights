@@ -10,8 +10,8 @@ def receiveMail(type,mailId):
 def getMetaInfoList():
     return {"from":int(time.time())}
 @bind("/mail/receiveAllMail")
-def receiveAllMail(mailList,sysMailList):
-    return {"mailList":mailList,"sysMailList":sysMailList}
+def receiveAllMail(mailIdList,sysMailIdList):
+    return {"mailIdList":mailIdList,"sysMailIdList":sysMailIdList}
 @bind("/mail/removeAllReceivedMail")
 def removeAllReceivedMail():
     return {}
