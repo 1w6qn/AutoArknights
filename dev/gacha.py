@@ -95,7 +95,7 @@ def auto_select_tags(tags):
     return res,sp_tag,duration
 def advanced_gacha(player,pool_id):#0no 1normal 3free
     if pool_id[0:7]=='LIMITED' and player.data.gacha['limit'][pool_id]['leastFree']:tkt=3
-    elif player.status['gachaTicket']:tkt=1
+    elif player.data.status['gachaTicket']:tkt=1
     else:tkt=0
     r= player.api.gacha.advancedGacha(player.gs,pool_id,tkt)
     char_get=ch.Character(r['charGet'])

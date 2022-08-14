@@ -13,7 +13,7 @@ def check_in(player,act):
         print(res)
         player.data.update(res['playerDataDelta'])
         item_get=res['items']
-        log.d(f"{act.name}第{i+1}天签到成功 获得 {items2str(item_get)}}")
+        log.d(f"{act.name}第{i+1}天签到成功 获得 {items2str(item_get)}")
 def get_login_reward(player,act):
     act=Activity(act[1]|{"id":act[0]})
     if not act.reward:
