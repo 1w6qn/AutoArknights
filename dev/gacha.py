@@ -61,8 +61,8 @@ def calc_all(tags,chars):
         for j in cb(tags,i):
             def f(tags,char):
                 c=0
-                for i in tags:
-                    if i in char[1]['tagList']:c+=1
+                for k in tags:
+                    if k in char[1]['tagList']:c+=1
                 if c==len(tags):return True
                 else:return False
             if res:=list(filter(lambda x:f(j,x),chars.items())):

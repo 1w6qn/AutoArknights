@@ -17,7 +17,7 @@ def play(p):
     if act:=p.data.activity['PRAY_ONLY']:
         dev.activity.get_pray_reward(p,list(act.items())[0])
     else:
-        log.d('无可用幸运墙活动')
+        log.d('无可用祈愿活动')
     if act:=p.data.activity['LOGIN_ONLY']:
         dev.activity.get_login_reward(p,list(act.items())[0])
     else:
