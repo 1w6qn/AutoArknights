@@ -1,28 +1,30 @@
 from utils import *
 char_table=load_json('./gamedata/zh_CN/gamedata/excel/character_table.json')
+tag_table=load_json('./gamedata/zh_CN/gamedata/excel/gacha_table.json')['gachaTags']
 favor_table=load_json('./gamedata/zh_CN/gamedata/excel/favor_table.json')
 game_const=load_json('./gamedata/zh_CN/gamedata/excel/gamedata_const.json')
+
+t={'SNIPER':2,'MEDIC':4,'SUPPORT':5,'WARRIOR':1,'TANK':3,'CASTER':6,'PIONEER':8,'SPECIAL':7,'MELEE':9,'RANGED':10,0:28,1:17,2:0,3:0,4:14,5:11}
+
 favor_level=[]
 for i in favor_table['favorFrames']:favor_level.append(i['level'])
+
+class Tag:
+    def __eq__(self,other):
+        return self.id==other.id
+    def __getattr__(self,name):
+        key="tag"+name[0].upper()+name[1:]
+        return self._data[key]
+    def __init__(self,key):
+        if isinstance(key,str):st="tagName"
+        elif isinstance(key,int):st="tagId"
+        self._data=filter(lambda x:key==x[st],tag_table)
 class Character:
-    class data:
-        def __init__(self,name,value):
-            self.value=value
-            self.name=name
-        def __get__(self,inst,owner):
-            return self.value
-        def __set__(self,inst,value):
-            self.value=value
-        def __str__(self):
-            return f"{self.name}:{self.value}"
     def update(self,new):
         #old=str(self)
         self.attr=new
         #self.__dict__.update(new)
         #print(f"{old} -> {str(self)}")
-    def __getattr__(self,item):
-        if item not in self.attr:return None
-        return self.data(item,self.attr[item])
     @property
     def maxExp(self):
         if self.level==self.maxLevel:return 0
@@ -55,6 +57,8 @@ class Character:
         if 'id' in data:self.charId=self.id
         self.__dict__.update(char_table[self.charId])
         self.colored=True
+        self.tagList+=[t[self.profession],t[self.position],t[self.rarity]]
+        self.tagList= [Tag(i)for i in self.tagList]
     def __str__(self):
         table="{0:{3}<10}\t{1:{3}<10}\t{2:{3}<10}\t"
         return table.format(f"{self.name}",f"精{self.evolvePhase} {self.level}级",f"{self.favorPercent}%",chr(12288))

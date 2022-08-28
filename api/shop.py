@@ -2,7 +2,7 @@ from api import bind
 @bind("/shop/getFurniGoodList")
 def getFurniGoodList():
     return {}
-		"shop/buyFurniGood"; 
+"""		"shop/buyFurniGood"""
 @bind("/shop/getSkinGoodList")
 def getSkinGoodList(charIdList):
     return {"charIdList":charIdList}
@@ -39,7 +39,7 @@ def getGoodPurchaseState(goodIdMap):
 @bind("/shop/decomposePotentialItem")
 def decomposePotentialItem(CharInstIdList):
     return {"charInstIdList":charInstIdList} 
-		"shop/buyHighGood"; 
+"""		"shop/buyHighGood"; 
 		"shop/buyExtraGood"; 
 		"shop/buyLowGood"; 
 		"shop/buyGPGood"; 
@@ -53,3 +53,4 @@ def decomposePotentialItem(CharInstIdList):
 		"shop/buyRepGood"; 
 		"shop/getVoucherSkinGoodList"; 
 		"shop/useVoucherSkin"; 
+"""

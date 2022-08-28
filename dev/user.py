@@ -1,7 +1,7 @@
 import log
 from object.item import items2str
 def check_in(player):
-    res=player.api.user.checkIn(player.gs)
+    res=player.api.user.checkIn(player)
     print(res)
     player.data.update(res['playerDataDelta'])
     items_get=res['signInRewards']

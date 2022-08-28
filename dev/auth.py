@@ -10,7 +10,6 @@ def user_login(player):
     log.d(f"auth登录成功:access_token:{player.access_token}, channel_uid:{player.channel_uid}")
 def get_token(player):
     r=player.api.auth.getToken(**player.attr)
-    player.gs.uid=r['uid']
-    player.uid=player.gs.uid
+    player.gs_post=player.uid=r['uid']
     player.token=r['token']
     log.d(f"token获取成功:token:{player.token}, uid:{player.uid}")

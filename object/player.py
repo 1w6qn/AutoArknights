@@ -1,13 +1,14 @@
-import object.gameServer,object.playerData
+import object.server,object.playerData
 import json
 import utils
 import api
 class Player:
     dump_list=['account','password','access_token','platform','server']
-    def init_data(self,data):
-        self.data=object.playerData.PlayerData(data)
+    as_post=object.server.AuthServer()
+    gs_post=object.server.GameServer()
+    nc=object.server.NetworkConfig()
+    data=object.playerData.PlayerData()
     def __init__(self,account,password,access_token=""):
-        self.gs=object.gameServer.GameServer()
         self.account=account
         self.password=password
         self.access_token=access_token
@@ -15,13 +16,14 @@ class Player:
         self.deviceId2=utils.get_random_device_id2()
         self.deviceId3=utils.get_random_device_id3()
         self.platform=1
+        self.platform_id='Android'
         self.server="zh_CN"
         api.player=self
         self.api=api
     @classmethod
     def load_from_json(cls,filename):
-        with open(filename,'r+') as f:
-            j=json.loads(f.read())
+        with open(filename,'r') as f:
+            j=json.load(f)
         return [cls(**i)for i in j]
     @property
     def attr(self):return self.__dict__

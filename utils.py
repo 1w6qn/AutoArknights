@@ -1,15 +1,10 @@
 import hmac,hashlib,json,random,string
-import time,requests
-import config
-class color:
-    RED="\033[31m"
-    WHITE="\033[37m"
-    GREEN="\033[32m"
-    YELLOW="\033[33m"
-    BLUE="\033[34m"
-    MAGENTA="\033[35m"
-    RESET="\033[0m"
-rcolor=[color.WHITE,color.GREEN,color.BLUE,color.MAGENTA,color.YELLOW,color.RED]
+import zipfile,io,base64
+HMAC_KEY = '91240f70c09a08a6bc72af1a5c8d4670'
+def decrypt_battle_replay(battle_replay):
+    data=base64.b64decode(battle_replay)
+    with zipfile.ZipFile(io.BytesIO(data), "r") as z_file:
+        return z_file.read("default_entry").decode()
 def merge_dict(old, new):
     for k in new:
         if k in old:
@@ -35,22 +30,8 @@ def get_random_device_id2():
 def get_random_device_id3():
     return GetMd5(''.join(random.choices(string.ascii_letters + string.digits, k = 12)))
 def u8_sign(data):
-    sign = hmac.new(config.HMAC_KEY.encode(), data.encode(), hashlib.sha1)
+    sign = hmac.new(HMAC_KEY.encode(), data.encode(), hashlib.sha1)
     return sign.hexdigest()
-def report(data):
-    msg=time.strftime("[%H:%M:%S]", time.localtime())+" "+data
-    print(msg)
 def load_json(filename):
     with open(filename,'r') as f:
         return json.loads(f.read())
-def get_from_conf(url):
-    return requests.get(url,headers=config.COMMON_HEADER).json()
-def update_config():
-    res=get_from_conf(config.HOST['CONFIG']+"/config/prod/official/network_config")
-    content=json.loads(res["content"])
-    config.NETWORK_VERSION,func_ver=content["configVer"],content["funcVer"]
-    config.NETWORK_CONFIG=content['configs'][func_ver]['network']
-    v=get_from_conf(config.NETWORK_CONFIG['hv'].format(config.PLATFORM_ID))
-    config.RES_VERSION,config.CLIENT_VERSION=v['resVersion'],v['clientVersion']
-    report(f"资源更新成功 ResVersion:{config.RES_VERSION} ClientVersion:{config.CLIENT_VERSION}")
-update_config()

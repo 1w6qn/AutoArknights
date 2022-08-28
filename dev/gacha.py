@@ -32,42 +32,37 @@ for i in filter(recr_filter,ch.char_table.items()):
     if r:tag_list+=[r]
     recruit_pool.update({name:{'tagList':tag_list,'rarity':rarity}})
 log.d("公招初始化成功")
-def auto_finish_recruit(player):
-    for id,slot in player.data.recruit['normal']['slots'].items():
-        if not slot['state']:continue
-        if slot['state']==2 and time.time()>=slot['maxFinishTs']:
-            r=player.api.gacha.finishNormalGacha(player.gs,id)
-            log.d(f"公招#{int(id)+1}完成")
-            player.data.update(r['playerDataDelta']) 
+def finish_recruit(player,id):
+    r=player.api.gacha.finishNormalGacha(player.gs,id)
+    if 'error' in r:log.e(r['msg']);return
+    char_get=ch.Character(r['charGet'])
+    item_get=r['charGet']['itemGet']
+    player.data.update(r['playerDataDelta'])
+    log.d(f"公招#{int(id)+1}完成 {char_get.isNew}获得{char_get.name} 获得 {items2str(item_get)}")
 def auto_recruit(player):
     for id,slot in player.data.recruit['normal']['slots'].items():
-        if not slot['state']:continue
-        if slot['state']==2 and time.time()>=slot['maxFinishTs']:
-            r=player.api.gacha.finishNormalGacha(player.gs,id)
-            char_get=ch.Character(r['charGet'])
-            item_get=r['charGet']['itemGet']
-            log.d(f"公招#{int(id)+1}完成 {char_get.isNew}获得{char_get.name} 获得 {items2str(item_get)}")
-            player.data.update(r['playerDataDelta'])
+        if not slot['state']==1:continue
         if not player.data.status['recruitLicense']:
-            log.d("调用凭证不足")
-            return
+            continue
         tags,sp_tag,duration=auto_select_tags(slot['tags'])
-        res=player.api.gacha.normalGacha(player.gs,id,tags,sp_tag,duration)
-        player.data.update(res['playerDataDelta'])
-        log.d(f"公招#{int(id)+1} 成功, 选中{tags}, 时长{duration}")
-def calc_all(tags,chars):
-    r={}
+        res=recruit(player,id,tags,sp_tag,duration)
+        print(res)
+        
+def recruit(player,id,tags,sp_tag,duration):
+    r=player.api.gacha.normalGacha(player.gs,id,tags,sp_tag,duration)
+    if 'error' in r:log.e(r['msg']);return
+    player.data.update(r['playerDataDelta'])
+    log.d(f"公招#{int(id)+1} 成功, 选中{tags}, 时长{duration}")
+    return r
+def calc_all(tags,chars,r={}):
     for i in range(1,4):
         for j in cb(tags,i):
-            def f(tags,char):
-                c=0
+            def f(tags,char,c=0):
                 for k in tags:
-                    if k in char[1]['tagList']:c+=1
-                if c==len(tags):return True
-                else:return False
-            if res:=list(filter(lambda x:f(j,x),chars.items())):
-                if j in r:r[j]+=res[0]
-                else:r[j]=res[0]
+                    if k in chars[char]['tagList']:c+=1
+                return c==len(tags)
+            if res:=list(filter(lambda x:f(j,x),chars.keys())):
+                r[j]=sorted(res,key=lambda x:chars[x]['rarity'])
     return r
 def char_filter(tags,char):
     tag_list=char[1]['tagList']
@@ -75,8 +70,7 @@ def char_filter(tags,char):
     max_rarity=4
     min_rarity=2
     if '高级资深干员' in tags:max_rarity=5
-    if rarity>max_rarity or rarity<min_rarity:return 0
-    return 1
+    return min_rarity<=rarity<=max_rarity
 def auto_select_tags(tags):
     if 14 in tags:sp_tag=14
     elif 11 in tags:sp_tag=11

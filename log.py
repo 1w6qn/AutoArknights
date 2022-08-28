@@ -11,6 +11,9 @@ rcolor=[color.WHITE,color.GREEN,color.BLUE,color.MAGENTA,color.YELLOW,color.RED]
 def d(data):
     msg=time.strftime("[%H:%M:%S]", time.localtime())+" "+data
     print(msg)
+def w(data):
+    msg=time.strftime("[%H:%M:%S]", time.localtime())+" "+data
+    print(color.YELLOW+msg+color.RESET)
 def e(data):
     msg=time.strftime("[%H:%M:%S]", time.localtime())+" "+data
     print(color.RED+msg+color.RESET)

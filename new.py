@@ -1,11 +1,13 @@
 from object import *
 import dev
 import log
-def play(p):
+def login(p):
     dev.auth.auth_login(p)
     dev.auth.get_token(p)
     dev.account.login(p)
     dev.account.sync_data(p)
+def play(p):
+    login(p)
     if p.data.checkIn['canCheckIn']:
         dev.user.check_in(p)
     else:
