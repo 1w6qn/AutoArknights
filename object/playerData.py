@@ -1,17 +1,41 @@
 import json
 from utils import *
-from object.character import Character
+from object.character import *
 from object.item import Item
 from object.shop import Shop
 from object.recruit import Recruit
+class GameData:
+    def __get__(self,obj,type):
+        return self
+    def __set__(self,obj,val):
+        path=f"gamedata/{obj.server}/gamedata/excel/{val}"
+        with open(path,'r')as f:
+            self.__dict__[val[:-5]]=json.load(f)
+            print(f"Loaded {val}")
+    def __str__(self):
+        return f"Loaded {str(self.__dict__.keys())}"
+    def __repr__(self):
+        return self.__str__
 class PlayerData:
     recruit=Recruit()
+    gamedata=GameData()
+    chars=CharacterDatabase()
+    gachaTags=GachaTagDatabase()
     def __get__(self,obj,type):
         self.server=obj.server
+        if not self.gamedata_init:
+            self.gamedata="character_table.json"
+            self.gamedata="gacha_table.json"
+            self.gamedata="favor_table.json"
+            self.gamedata="gamedata_const.json"
+            self.gamedata="item_table.json"
+            self.gamedata="stage_table.json"
+            self.gamedata_init=True
         return self
     def __set__(self,obj,data):
         if not self.init:
             self.__dict__.update(data)
+            self._api=obj.api
             self.sort_list={"key":"rarity","reverse":True}
             self.item_filter={"key":"sortId"}
             self.__chars=[Character(v)for k,v in data['troop']['chars'].items()]
@@ -19,22 +43,12 @@ class PlayerData:
             self.init_shops()
             self.init=True
         else:self.update(data)
-    def load(self,filename):
-        with open(f"gamedata/{self.server}/gamedata/excel/{filename}",'r')as f:
-            return json.load(f)
     @property
     def items(self):
         return list(filter(lambda x:x.__dict__[item_filter["key"]],__items))
-    @property
-    def chars(self):
-        key=self.sort_list|{"key":lambda x:x.__dict__[self.sort_list['key']]}
-        return sorted(self.__chars,**key)
-    def list_box(self):
-        for i in self.chars:print(i)
-    def __getattr__(self,k):
-        return None
     def __init__(self):
         self.init=False
+        self.gamedata_init=False
     def init_shops(self):
         pass
     def update(self,new):

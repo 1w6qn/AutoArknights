@@ -1,7 +1,8 @@
-import api,json
+from api import bind
+from functools import partial
+import json
 import config
-def bind(cgi):
-    return api.bind(cgi,auth=True)
+bind=partial(bind,type='as')
 @bind("/user/login")
 def login(account,password,deviceId,platform):
     return {"account":account,"password":password,"deviceId":deviceId,"platform":platform}
