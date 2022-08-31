@@ -20,6 +20,7 @@ class Player:
         self.server=server
         api.player=self
         self.api=api
+        self.uid=""
     def post(self,type,cgi,data):
         if type=='as':server=self._as_post
         elif type=='gs':server=self._gs_post

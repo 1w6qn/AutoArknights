@@ -1,12 +1,10 @@
 import log
 import time
-import object.character as ch
 from object.item import items2str
 from utils import *
 def finish_recruit(player,id):
     r=player.api.gacha.finishNormalGacha(player.gs,id)
-    if 'error' in r:log.e(r['msg']);return
-    char_get=ch.Character(r['charGet'])
+    char_get=player.data.chars.get(r['charGet']['id'])
     item_get=r['charGet']['itemGet']
     player.data.update(r['playerDataDelta'])
     log.d(f"公招#{int(id)+1}完成 {char_get.isNew}获得{char_get.name} 获得 {items2str(item_get)}")
@@ -15,7 +13,13 @@ def auto_recruit(player):
         if not slot['state']==1:continue
         if not player.data.status['recruitLicense']:
             continue
-        tags,sp_tag,duration=auto_select_tags(slot['tags'])
+        duration=27600
+        rget,tags=player.data.recruit.pool.check(slot['tags'])
+        if tags==None and rget>3:
+            log.d('发现稀有 tag请自行选择')
+            continue
+        if rget:duration=32400
+        if tags==None and rget==0:tags=[]
         res=recruit(player,id,tags,sp_tag,duration)
         print(res)
 def recruit(player,id,tags,sp_tag,duration):
@@ -29,7 +33,7 @@ def advanced_gacha(player,pool_id):#0no 1normal 3free
     elif player.data.status['gachaTicket']:tkt=1
     else:tkt=0
     r= player.api.gacha.advancedGacha(player.gs,pool_id,tkt)
-    char_get=ch.Character(r['charGet'])
+    char_get=player.data.chars.get(r['charGet']['id'])
     item_get=r['charGet']['itemGet']
     print(f"{pool_id}单抽成功 {char_get.isNew}获得{char_get.name} 获得 {items2str(item_get)}")
     player.data.update(r['playerDataDelta'])

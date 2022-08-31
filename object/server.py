@@ -44,6 +44,7 @@ class GameServer:
         self.uid=val
     def __get__(self,obj,type):
         if not self.url:self.url=obj.nc['gs']
+        if not self.uid:self.uid=obj.uid
         return self.post
 class NetworkConfig:
     def __init__(self):
